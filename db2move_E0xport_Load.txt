@@ -1,0 +1,84 @@
+cd /d E:\DBBackup\DB01
+  
+REM -- There are two instances: DB2 (with databases DB01 and DB02) and DB10 (with database DB11).
+REM -- step1 backup database
+set DB2INSTANCE=DB2
+db2 backup database DB01 to E:\DBBackup\DB01\
+db2 backup database DB02 to E:\DBBackup\DB02\
+  
+REM -- If you have more than one instance, it's better to specify a different driver for each instance.
+REM -- I have specified the same drive for different instances, and one instance's database can't be accessed..
+set DB2INSTANCE=DB10                              //we can ignore this step   
+db2 backup database DB11 to F:\DBBackup\DB11\
+
+REM -- step2 check backup
+mkdir E:\dbmove\backupList\
+cd /d E:\dbmove\backupList\
+set DB2INSTANCE=DB2
+db2 list history backup all for DB01" >backuplist_DB01.txt
+db2 list history backup all for DB02" >backuplist_DB02.txt
+set DB2INSTANCE=DB10
+db2 list history backup all for DB11" >backuplist_DB11.txt
+
+REM -- step3 Create a file containing a list.
+E:\dbmove\DB01\tableList_DB01_1.txt	
+E:\dbmove\DB02\tableList_DB02_1.txt	
+REM --※1 ファイルの文字コードはSJIS(サクラエディター)　ダブルクォーテーションは半角である。　例：　"DB01"."table01"
+REM --※2 ファイルの最後に空白行を入れる。
+REM --The file encoding is SJIS (Sakura Editor) and double quotation marks are half-width. Example: "DB01"."table01"
+REM -- Add a blank line at the end of the file
+
+REM -- step4 db2move <db> export .
+set DB2INSTANCE=DB2
+cd /d E:\dbmove\DB01\
+REM -- We can ignore the connection content.
+db2 connect to DB01 user DB01 using adminDB01
+db2move DB01 export -tf tableList_DB01_1.txt >expByList_DB01_1.txt
+cd /d E:\dbmove\DB02\
+db2 connect to DB02 user DB02 using adminDB02
+db2move DB02 export -tf tableList_DB02_1.txt >expByList_db02_1.txt
+
+REM -- step5 copy the export files to another server.
+xcopy E:\dbmove\DB01 B:\dbmove\DB01\ /S /E /H /I /Y >xcopy_export_DB01_1.txt  
+
+REM ------------------------------------------------------------------------------
+REM Please execute runstats before import!!! runstats will execute very slow for tables which have many rows and columns
+db2 -x "SELECT 'RUNSTATS ON TABLE ' || rtrim(tabschema) || '.' || char(tabname)||' WITH DISTRIBUTION AND DETAILED INDEXES ALL;' FROM syscat.tables WHERE type = 'T' ORDER BY tabschema, tabname;" >runstats_all.sql
+db2 -tvf runstats.sql > runstats_all.sql
+  
+REM -- step6 Change the configuration if the table has foreign keys.
+cd /d e:\_Prepare\testSql
+db2 -x "select 'set integrity for DB01.' || trim(tabname) || ' off;' from syscat.tables where tabschema='DB01' and type='T'" > check_off.sql
+db2 -tvf check_off.sql
+
+db2 "select tabschema,tabname,status from syscat.tables where tabschema='DB01' and type='T' " > check_status.txt
+REM --※status changed from 'N' to 'C' 
+REM -- under status 'C', we can't use select content, and can't get correct card. !!!
+
+REM -- step7 db2move <db> load 
+set DB2INSTANCE=DB2
+cd /d E:\dbmove\DB01\
+db2 connect to DB01 user DB01 using adminDB01
+db2move DB01 load > imp_db01.txt
+
+REM -- step9 restore configuratio of integrity
+db2 -x "select 'set integrity for DB01.' || trim(tabname) || ' immediate checked;' from syscat.tables where tabschema='DB01' and type='T'" > check_on.sql
+db2 -tvf check_on.sql
+
+db2 select tabschema,tabname,status from syscat.tables where tabschema= 'DB01' and type='T' > check_status2.txt
+REM -- ※status changed from 'C' to 'N' 
+  
+REM -- step10 check the tables rows.
+db2 "SELECT TABNAME, CARD FROM SYSCAT.TABLES WHERE TABSCHEMA = 'DB01'  ORDER BY TABNAME" >table_db01.txt
+
+
+
+
+-------------------------------------------------------------------------------
+
+db2 set integrity for DB01.table01 off
+db2 select tabschema,tabname,status from syscat.tables where tabname='table01'
+
+set integrity for DB01.table01 immediate checked;   
+
+db2 RUNSTATS ON TABLE DB01.table01
