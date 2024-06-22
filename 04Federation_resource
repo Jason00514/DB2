@@ -1,0 +1,22 @@
+https://www.ibm.com/docs/ja/db2/11.5?topic=federation-configuring-data-sources
+フェデレーションとデータ・ソースの構成
+
+
+https://www.ibm.com/docs/ja/db2/9.7?topic=SSEPGG_9.7.0/com.ibm.swg.im.iis.db.found.conn.fw.db2.doc/topics/rlsdb206.htm
+CREATE SERVER ステートメント - DB2 ラッパーの場合の例
+CREATE SERVER DB2SERVER TYPE DB2/CS VERSION 9.7 WRAPPER DRDA
+       AUTHORIZATION "spalten" PASSWORD "db2guru" 
+       OPTIONS (DBNAME 'CLNTS390', CPU_RATIO '0.001')
+
+
+https://www.ibm.com/docs/ja/db2/11.5?topic=server-creating-federated-database
+フェデレーテッド・データベースの作成
+CREATE DATABASE federated USING CODESET ISO8859-15 TERRITORY BR
+
+
+https://www.ibm.com/docs/ja/db2/11.5?topic=sources-registering-server-definitions-db2-data
+Db2 データ・ソースのサーバー定義の登録
+CREATE SERVER S1 TYPE db2/luw VERSION 11 WRAPPER DRDA
+AUTHORIZATION "iidev29" PASSWORD "passw0rd"
+OPTIONS (HOST 'devluw.ibm.com', PORT '50000', DBNAME 'clients')
+
