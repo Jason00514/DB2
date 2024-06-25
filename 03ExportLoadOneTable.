@@ -1,0 +1,36 @@
+（１）現行本番DBサーバで、エクスポートを行う
+    （Ａ）フォルダの設定とデータベースの接続
+    
+        mkdir R:\dbmove\DB01DB\
+        cd /d R:\dbmove\
+        set DB2INSTANCE=DB2
+        db2 connect to DB01DB user DB01 using adminDB01DB
+    
+    （Ｂ）テーブル「table01」のエクスポート
+        db2 export to "R:\dbmove\DB01DB\table_table01_01.csv" of del "select * from table01 where date01 between 20240624 and 20240705"
+        db2 export to "R:\dbmove\DB01DB\table_table01_02.csv" of del "select * from table01 where data01 between 20240612 and 20240623"
+
+（２）エクスポート結果を現行本番DBサーバから新本番DBサーバへ転送する。
+    xcopy R:\dbmove\DB01DB\table_* B:\dbmove\DB01DB\ /S /E /H /I /Y >xcopy_ExportTable_DB01DB.txt
+
+（３）新本番DBサーバで、インポートを行う
+    （Ａ）フォルダの設定とデータベースの接続
+        cd /d H:\dbmove\DB01DB\
+        set DB2INSTANCE=DB2
+        db2 connect to DB01DB user DB01 using adminDB01DB
+    （Ｂ）テーブル「table01」のインポート
+        db2 import from "H:\dbmove\DB01DB\table_table01_01.csv" of del "insert into table01"
+        db2 import from "H:\dbmove\DB01DB\table_table01_02.csv" of del "insert into table01"
+（４）移行検証（移行前<現行DB>と移行後<新DB>）
+    db2 values user
+    db2 "SELECT TABNAME, CARD FROM SYSCAT.TABLES WHERE TABSCHEMA = 'DB01' ORDER BY TABNAME" >table_DB01DB.txt
+
+
+-------------------------------------
+以下のようなコマンドで、一括に複数エクスポートされたファイルをインポートすることができます。
+db2 load from "H:\dbmove\WA01\table_table02_01.csv,
+　　　　　　　H:\dbmove\WA01\table_table02_02.csv,
+　　　　　　　H:\dbmove\WA01\table_table02_03.csv"
+of del "insert into table02"
+
+Write to one line, delete teh enter.
