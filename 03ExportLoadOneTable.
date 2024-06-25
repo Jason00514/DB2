@@ -33,4 +33,4 @@ db2 load from "H:\dbmove\WA01\table_table02_01.csv,
 　　　　　　　H:\dbmove\WA01\table_table02_03.csv"
 of del "insert into table02"
 
-Write to one line, delete teh enter.
+Write to one line, delete enter and space.
