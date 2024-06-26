@@ -1,0 +1,57 @@
+import from y:\aa.csv of del COMMITCOUNT 300000 message x:\bb.log insert_update into table01  
+
+
+import from y:\aa.csv of del COMMITCOUNT 300000 message x:\bb.log insert_update into table01
+
+This is the main command used to import data into a DB2 database table.
+
+from y:\aa.csv:
+This specifies the source file from which the data will be imported. In this case, y:\aa.csv is the path to the CSV file.
+
+of del:
+This specifies the format of the data file. del stands for delimited text file (such as CSV).
+
+COMMITCOUNT 300000:
+This option specifies that a commit should be performed after every 300,000 rows are processed. Committing data periodically helps to manage transaction log space and can improve performance for large data imports.
+
+message x:\bb.log:
+This specifies the path to the message file where any warnings, errors, and informational messages generated during the import process will be logged. In this case, x:\bb.log is the path to the message log file.
+
+insert_update:
+This option specifies the import mode. insert_update means that the command will insert new rows and update existing rows in the target table. If a row with the same primary key already exists, it will be updated; otherwise, a new row will be inserted.
+
+into table01:
+This specifies the target table into which the data will be imported. In this case, table01 is the name of the target table.
+
+-------------------------------------------------
+Detailed Explanation
+import:
+The import utility in DB2 is used to read data from an external file and insert it into a DB2 table.
+
+from y:\aa.csv:
+The from clause indicates the source file path. Here, y:\aa.csv is a CSV file from which data will be imported.
+
+of del:
+The of clause specifies the format of the source file. del (delimited) indicates that the file is a delimited text file, such as a CSV (Comma-Separated Values) file. Other possible formats include asc for ASCII files or ixf for Integration Exchange Format files.
+
+COMMITCOUNT 300000:
+COMMITCOUNT is used to specify the number of records to process before issuing a commit. This helps in controlling the size of the transaction log and ensures that the import process is more manageable by breaking it into smaller transactions. In this case, the command will commit after every 300,000 rows.
+
+message x:\bb.log:
+The message clause specifies the file where the import process will write messages, including errors and warnings. This log file helps in diagnosing any issues that occur during the import process. x:\bb.log is the specified log file path.
+
+insert_update:
+The insert_update option indicates that the import process will insert new rows into the table and update existing rows if a row with the same primary key exists. This mode is useful when you want to synchronize data between the source file and the target table.
+
+into table01:
+The into clause specifies the target table where the data from the source file will be imported. Here, table01 is the target table in the DB2 database.
+
+Example Scenario
+Suppose you have a CSV file (y:\aa.csv) containing updated customer data, and you want to import this data into an existing customer table in your DB2 database. You also want to ensure that the data import process commits every 300,000 rows to manage the transaction log effectively and keep track of any issues in a log file (x:\bb.log). The command you provided achieves this by:
+
+Reading data from y:\aa.csv
+Treating the file as a delimited text file
+Committing after every 300,000 rows
+Logging messages to x:\bb.log
+Inserting new rows and updating existing rows in the customer table
+This command is useful for efficiently importing large datasets while ensuring data integrity and manageability.
