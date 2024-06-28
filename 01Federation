@@ -1,0 +1,45 @@
+1.インスタンスの作成
+>db2icrt DBNEW
+>db2ilist 
+>db2level
+>db2 get instace
+>db2start
+
+2.データベースの作成
+>db2"create database DB01 on L:\ using codeset IBM-943 territory JP collate using SYSTEM"
+(UTF-8 is not setting by current db)
+
+3.ノードの追加
+>db2 catalog local node DBNEW instance DBNEW
+(db2 uncatalog node DBNEW)
+>db2 list node directory
+
+4.リモートDBの追加
+>db2 catalog database DBSchema10 at node DBNEW
+>dbw list db directory
+
+5.db2look ファイルの改修
+5.1 db2look -eファイルに以下の箇所を変更
+    変更前：
+    connect to DB01;
+    変更後:
+    connect to DB01 user DB01ADMIN using adminDB01;
+    
+    change current statement as below
+    CONNECT TO DB01 user user04 using password123;
+    create wrapper "DRDA" library 'db2drda.dll' options (DB2_FENCED 'N');
+    
+    create server "DBSchema10" type DB2/UDB version '11.5' WRAPPER "DRDA"
+    authorization "DBSchema10ADMIN" password "adminDBSchema10" options(DBNAME 'DBSchema10')
+
+6.FED許可の変更
+>db2 update dbm cfg using federated yes
+
+7.復元する
+>db2 -tvf db2look-l.sql
+>db2 -tvf db2look-e.sql
+>db2 -tvf db2look-x.sql
+
+
+登録ユーザのパスワードを変更
+>db2 connect to DB01 user DB01ADMIN suing password123 new adminDB01 confirm adminDB01
