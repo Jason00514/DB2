@@ -1,0 +1,112 @@
+■1.Change db2look -l file(tablespace) defination as below
+
+CREATE REGULAR TABLESPACE　 -->　 CREATE TABLESPACE
+MANAGED BY DATABASE 　--> 　MANAGED BY AUTOMATIC STORAGE
+USING (FILE 'L:\DB2\WAD_D_CF2.dbf' 2794912)　 --> 　""
+INCREASESIZE 10 PERCENT　 -->　 INITIALSIZE 32 M
+
+sample
+DB2 V9.5
+---------start
+CREATE REGULAR TABLESPACE "TSD_A_4096" IN DATABASE PARTITION GROUP IBMDEFAULTGROUP PAGESIZE 4096 MANAGED BY DATABASE 							
+	 USING (FILE 'E:\DB2\TSD_A_4096_1.dbf' 375968,						
+		FILE 'E:\DB2\TSD_A_4096_2.dbf' 375968,					
+		FILE 'E:\DB2\TSD_A_4096_3.dbf' 375968,					
+		FILE 'E:\DB2\TSD_A_4096_4.dbf' 375968)					
+	 EXTENTSIZE 32						
+	 PREFETCHSIZE 32						
+	 BUFFERPOOL BUFPDAT4K						
+	 OVERHEAD 7.500000						
+	 TRANSFERRATE 0.060000						
+	 AUTORESIZE YES 						
+	 INCREASESIZE 10 PERCENT 						
+	 MAXSIZE NONE  						
+	 DROPPED TABLE RECOVERY ON;						
+
+---------end
+
+DB2 V11.5
+--------start
+CREATE TABLESPACE "TSD_A_8192" IN DATABASE PARTITION GROUP IBMDEFAULTGROUP PAGESIZE 8192 MANAGED BY AUTOMATIC STORAGE 		
+	 EXTENTSIZE 16	
+	 PREFETCHSIZE 32	
+	 BUFFERPOOL BUFPDAT8K	
+	 OVERHEAD 7.500000	
+	 TRANSFERRATE 0.060000	
+	 AUTORESIZE YES 	
+	 INITIALSIZE 32M 	
+	 MAXSIZE NONE  	
+	 DROPPED TABLE RECOVERY ON;	
+--------end
+
+2.Change db2look -l file(tablespace) security,path as below
+CONNECT TO WA11
+CONNECT TO WA11 user username using pwd
+...
+USING ('G:\DB10...
+
+3.Change db2look -e file(tablespace) security,path as below
+3.1 Add user name and password
+CONNECT TO WA11
+CONNECT TO WA11 user username using pwd
+
+3.2Add security statement before "CREATE WRAPPER..."(or find "CREATE SERVER")
+CONNECT TO WA11 user dbcreator using pwd
+
+3.3Add user name(AUTHORIZATION) and password(PASSWORD) into "CREATE SERVER"
+CREATE SERVER "DB01" 
+   TYPE DB2/UDB 
+   VERSION '9.5' 
+   WRAPPER "DRDA"  
+   AUTHORIZATION ""
+   PASSWORD ""
+   OPTIONS
+     (DBNAME  'DB01'
+     );
+     
+3.4Add security statement before "CREATE AUDIT POLICY..."(or move the file bottom)
+CONNECT TO WA11 user DBcreator using pwd
+
+3.5change db2look -e 全角スペース　in CREATE VIEW
+
+3.6Add security statement before and after statement "CREATE TABLE "SYSPROC "."FED_STATS"
+
+CONNECT TO WA11 user DBcreator using pwd                   <---before
+------------------------------------------------
+-- 表の DDL ステートメント "SYSPROC "."FED_STATS"
+------------------------------------------------
+CREATE TABLE "SYSPROC "."FED_STATS"  (                <---after
+		 ...
+		 IN "TSD_A_4096" ; 
+CONNECT TO WA11 user username using pwd
+
+4.Change db2look -3 file
+4.1Add user name and password
+CONNECT TO WA11
+CONNECT TO WA11 user DBcreator using pwd
+
+4.2Add administrator role for DB
+GRANT SECADM ON DATABASE  TO USER "WA11ADMIN" ; --既存
+GRANT ACCESSCTRL ON DATABASE  TO USER "WA11ADMIN" ; --追加
+GRANT DATAACCESS ON DATABASE  TO USER "WA11ADMIN" ; --追加
+
+-------------------------------------------------------------------------
+delete database and recreate it again
+set DB2INSTANCE=DB2
+db2 list db diectory
+db2start
+db2 DROP DATABASE WA11
+
+db2 "create database WA11 on G:\ using codeset IBM-943 territory JP collate using SYSTEM"
+db2 list db directry|findstr WA11
+db2 -tvf db2look-l.txt > result_db2look-l.log
+db2 UPDATE DBM CFG USING federated YES
+db2 -tvf db2look-e.txt > result_db2look-e.log
+rem--- find result file(db2look-e.log) if there is error(eg.SQLSTATE=42704)
+db2 -tvf db2look-x.txt > result_db2look-x.log
+-------------------------------------------------
+using db2look getting ddl is as below 
+mkdir c:\WA11\
+db2look -d  WA11 -l -o c:\WA11\db2look-l.txt
+db2look -d  WA11 -e -o c:\WA11\db2look-e.txt
+db2look -d  WA11 -x -o c:\WA11\db2look-x.txt
