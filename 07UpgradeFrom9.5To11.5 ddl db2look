@@ -80,7 +80,7 @@ CREATE TABLE "SYSPROC "."FED_STATS"  (                <---after
 		 IN "TSD_A_4096" ; 
 CONNECT TO WA11 user username using pwd
 
-4.Change db2look -3 file
+4.Change db2look -x file
 4.1Add user name and password
 CONNECT TO WA11
 CONNECT TO WA11 user DBcreator using pwd
