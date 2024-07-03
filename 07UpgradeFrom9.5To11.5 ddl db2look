@@ -104,6 +104,7 @@ db2 UPDATE DBM CFG USING federated YES
 db2 -tvf db2look-e.txt > result_db2look-e.log
 rem--- find result file(db2look-e.log) if there is error(eg.SQLSTATE=42704)
 db2 -tvf db2look-x.txt > result_db2look-x.log
+db2 backup WA11 to G:\DBBackup\WA11
 -------------------------------------------------
 using db2look getting ddl is as below 
 mkdir c:\WA11\
