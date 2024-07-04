@@ -94,7 +94,8 @@ GRANT DATAACCESS ON DATABASE  TO USER "WA11ADMIN" ; --追加
 delete database and recreate it again
 set DB2INSTANCE=DB2
 db2 list db diectory
-db2start
+db2start  (SQL)
+db2 connect reset (SQL1035N 要求されたモードでは指定されたデータベースに接続できないため、操作が失敗しました。　SQLSTATE=57019)
 db2 DROP DATABASE WA11
 
 db2 "create database WA11 on G:\ using codeset IBM-943 territory JP collate using SYSTEM"
@@ -105,6 +106,15 @@ db2 -tvf db2look-e.txt > result_db2look-e.log
 rem--- find result file(db2look-e.log) if there is error(eg.SQLSTATE=42704)
 db2 -tvf db2look-x.txt > result_db2look-x.log
 db2 backup WA11 to G:\DBBackup\WA11
+
+db2 -x "select 'set integriy for DB01.' || trim(tabname) || ' off;' from syscat.tables where tabschema = 'DB01' and type ='T' " > check_off.sql
+db2 -tvf check_off.sql
+
+db2 -x "select 'set integrity for DB01.' || trim(tabname) || ' immediate checked; ' from syscat.tables where tabschema='DB01' and type ='T'" > check_on.sql
+db2 -tvf check_on.sql
+
+db2 -x "select 'RUNSTATS ON TABLE ' || rtrim(tabschema) || '.' || trim(tabname) || ' WITH DISTRIBUTION AND DETAILED INDEX ALL;' FROM syscat.tables WHERE type='T' ORDER BY tabschema,tabname" >runstats_all_WA11.sql
+db2 -tvf runstats_all_WA11.sql > result_runstats_all_WA11.log
 -------------------------------------------------
 using db2look getting ddl is as below 
 mkdir c:\WA11\
