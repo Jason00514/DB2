@@ -43,3 +43,49 @@
 
 登録ユーザのパスワードを変更
 >db2 connect to DB01 user DB01ADMIN suing password123 new adminDB01 confirm adminDB01
+
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+success:
+1.CreateWrapper.sql
+  CREATE WRAPPER DRDA LIBRARY 'db2drda.dll' OPTIONS (ADD DB2_FENCED  'N');
+
+2.CreateServer.sql
+  CREATE SERVER DB10 TYPE DB2/UDB VERSION '11.5' WRAPPER DRDA AUTHID "" PASSWORD "" OPTIONS( ADD DBNAME  'DB10');
+
+3.CreateUserMapping.sql
+  CREATE USER MAPPING FOR DB01ADMIN SERVER DB10 OPTIONS (ADD REMOTE_AUTHID '' ADD REMOTE_PASSWORD '');
+
+4.CreateNickName.sql
+  CREATE NICKNAME DB01ADMIN."table01" FOR DB10."DB10ADMIN"."table01";
+
+
+failure is as below 
+-- ---------------------------
+-- WRAPPER の DDL ステートメント
+-- ---------------------------
+CREATE WRAPPER "DRDA"
+   LIBRARY 'db2drda.dll' 
+   OPTIONS (DB2_FENCED  'N'
+     ); 
+
+-- ---------------------------
+-- SERVER の DDL ステートメント
+-- ---------------------------
+CREATE SERVER "DB10" 
+   TYPE DB2/UDB 
+   VERSION '9.5' 
+   WRAPPER "DRDA"  
+   AUTHORIZATION ""
+   PASSWORD ""
+   OPTIONS
+     (DBNAME  'DB10'
+     );
+
+-- --------------------------------
+-- NICKNAME の DDL ステートメント
+-- --------------------------------
+
+CREATE NICKNAME "DB01ADMIN"."table01" 
+   FOR "DB10"."DB10ADMIN"."table01";
