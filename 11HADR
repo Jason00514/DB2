@@ -1,0 +1,16 @@
+https://qiita.com/mi-kana/items/7fb2fecc02067bc8386b
+Db2 HADR on OpenShift かんたんデプロイ
+HADR(High availability disaster recovery)とは、Db2において提供される、データベース単位の高可用性を実現する機能です。
+データベースが2つ稼働した状態で、
+プライマリの役割を担うデータベース上の更新情報（ログ情報）
+をスタンバイ・データベースに転送＆再生することで本番データベースのコピーを作成し、
+有事の際にはスタンバイ・データベースに切り替えてサービスが継続することができます。
+
+
+https://qiita.com/mi-kana/items/3ffe39e43fbb421e6630
+Db2 HADRの基礎と構成手順を整理する
+
+
+
+
+
